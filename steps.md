@@ -53,5 +53,9 @@ INFO    2018-04-27 15:42:45     LiftoverVcf     Writing out sorted records to fi
 ```
 Liftover failed!
 
+The same was observed with the minimap2 liftover chain file.
 
+Bed coordinates lifted over well but the vcf have not !!!
+
+Should check what's going wrong...
 
