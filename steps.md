@@ -107,6 +107,49 @@ Runtime.totalMemory()=6759645184
 To get help, see http://broadinstitute.github.io/picard/index.html#GettingHelp
 ```
 Even after running with updated version of picard, there is still the error...
+Now I suspect that the chain file is wrong...
+
+```bash
+[kiranmayee.bakshy@assembler2 condensed_vcfs]$  java -jar /mnt/nfs/nfs1/kiranmayee.bakshy/picard/build/libs/picard.jar LiftoverVcf I=1.vcf.gz O=liftover/1.vcf.gz CHAIN=/mnt/nfs/nfs2/bickhart-users/cattle_asms/ars_ucd_114_igc/minimap_liftover/r1/umd3_ars.v14_mmap.liftover.chain REJECT=liftover/1.r.vcf.gz R=/mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa
+INFO    2018-05-02 12:11:51     LiftoverVcf     Processed 1495015 variants.
+INFO    2018-05-02 12:11:51     LiftoverVcf     65006 variants failed to liftover.
+INFO    2018-05-02 12:11:51     LiftoverVcf     120890 variants lifted over but had mismatching reference alleles after lift over.
+INFO    2018-05-02 12:11:51     LiftoverVcf     12.4344% of variants were not successfully lifted over and written to the output.
+INFO    2018-05-02 12:11:51     LiftoverVcf     liftover success by source contig:
+INFO    2018-05-02 12:11:51     LiftoverVcf     1: 1309119 / 1495015 (87.5656%)
+INFO    2018-05-02 12:11:51     LiftoverVcf     lifted variants by target contig:
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr1: 1301143
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr10: 97
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr11: 323
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr12: 432
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr13: 1104
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr14: 29
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr15: 2
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr17: 57
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr18: 280
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr19: 34
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr2: 1317
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr20: 46
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr21: 31
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr23: 11
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr27: 1107
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr3: 1195
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr4: 446
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr5: 10
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr6: 642
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr7: 126
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr8: 487
+INFO    2018-05-02 12:11:51     LiftoverVcf     chr9: 57
+INFO    2018-05-02 12:11:51     LiftoverVcf     chrX: 143
+WARNING 2018-05-02 12:11:51     LiftoverVcf     111833 variants with a swapped REF/ALT were identified, but were not recovered.  See RECOVER_SWAPPED_REF_ALT and associated caveats.
+INFO    2018-05-02 12:12:42     LiftoverVcf     Writing out sorted records to final VCF.
+INFO    2018-05-02 12:17:42     LiftoverVcf     written     1,000,000 records.  Elapsed time: 00:04:59s.  Time for last 1,000,000:  299s.  Last read position: chr1:120,384,709
+[Wed May 02 12:19:14 EDT 2018] picard.vcf.LiftoverVcf done. Elapsed time: 24.42 minutes.
+Runtime.totalMemory()=17024679936
+```
+The liftover was successful with some warning which has to be checked...
+
+
 
 
 
