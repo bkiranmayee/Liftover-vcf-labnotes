@@ -149,6 +149,27 @@ Runtime.totalMemory()=17024679936
 ```
 The liftover was successful with some warning which has to be checked...
 
+This process was done for all the vcf files using the script liftover_vcf.sh
+The slurm job output was saved to slurm-815853.out
+
+These lifted_over files have to be concatenated using bcftools concat
+
+```bash
+module load bcftools
+bcftools concat -a -Ob -f vcf.list -o combinedvcfs_new
+# set up ID column
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=5000 --wrap="bcftools annotate -I 'bakshy_%CHROM\_%POS\_%REF\_%FIRST_ALT' combinedvcfs.gz > combinedvcfs_id"
+gzip combinedvcfs_id
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=5000 --wrap="bcftools index -t combinedvcfs_id.gz"
+# download snpEff database
+java -jar snpEff.jar download UMD3.1.86
+# Start annotating
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=20000 -d afterany:job_id[:jobid...] --wrap="java -Xmx4g -jar /home/kiranmayee.bakshy/snpEff/snpEff.jar -v -stats ann_stats/combined.html UMD3.1.86 combinedvcfs_id.gz > annotated/combined.ann.vcf"
+
+
+
+
+
 
 
 
