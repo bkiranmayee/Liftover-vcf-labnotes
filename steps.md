@@ -207,8 +207,19 @@ Cmd line options: popstats -p /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/con
 The stats are ready...
 
 Now try to separate the homozygous variants...
+```bash
+ java -jar ~/snpEff/SnpSift.jar filter "(countHom()=172)" combined.ann.vcf > allHom.vcf
+ ```
 
 
+Generate some stats and plot:
+```bash
+# Calculating stats
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=10000 --wrap="gzip combined.ann.vcf | bcftools index; bcftools stats -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' combined.ann.vcf > combined.vstats"
+
+mkdir vcfstatplots
+plot-vcfstats -r -p vcfstatplots combined.vstats
+```
 
 
 
