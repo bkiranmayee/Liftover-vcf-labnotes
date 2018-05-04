@@ -164,9 +164,49 @@ sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=5000 --wrap="bc
 # download snpEff database
 java -jar snpEff.jar download UMD3.1.86
 # Start annotating
-sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=20000 -d afterany:job_id[:jobid...] --wrap="java -Xmx4g -jar /home/kiranmayee.bakshy/snpEff/snpEff.jar -v -stats ann_stats/combined.html UMD3.1.86 combinedvcfs_id.gz > annotated/combined.ann.vcf"
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=20000 --wrap="java -Xmx4g -jar /home/kiranmayee.bakshy/snpEff/snpEff.jar -v -stats ann_stats/combined.html UMD3.1.86 combinedvcfs_id.gz > annotated/combined.ann.vcf"
 
+[kiranmayee.bakshy@assembler2 annotated]$ java -jar ~/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has 'stop_gained')" combined.ann.vcf > combined_st.gn.vcf
+[kiranmayee.bakshy@assembler2 annotated]$ module load bcftools
+[kiranmayee.bakshy@assembler2 annotated]$ bcftools query -f'%CHROM\t%POS\t%REF\t%ALT\t%INFO/ANN\n' combined_st.gn.vcf > combined_st.gn.txt
+[kiranmayee.bakshy@assembler2 annotated]$ module load R
 
+> data<-read.table(file="/mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/ann_stats/combined.genes.txt",sep="\t",header=F,stringsAsFactors=F)
+> data_stgn<-data[,c(1,2,3,4,30)]
+> colnames(data_stgn)<-c("GeneName","GeneId","TranscriptId","BioType","stop_gain")
+> df<-data_stgn[data_stgn$stop_gain > 0,]
+> dim(df)
+[1] 737   5
+> dim(data_stgn)
+[1] 26396     5
+> head(df)
+    GeneName             GeneId       TranscriptId        BioType stop_gain
+517   ABCA13 ENSBTAG00000003531 ENSBTAT00000061018 protein_coding         3
+523    ABCA6 ENSBTAG00000006921 ENSBTAT00000009089 protein_coding         1
+567  ABHD16B ENSBTAG00000031906 ENSBTAT00000045249 protein_coding         1
+653   ACOT12 ENSBTAG00000011110 ENSBTAT00000014753 protein_coding         1
+682    ACSM3 ENSBTAG00000006447 ENSBTAT00000008455 protein_coding         1
+770  ADAMTS7 ENSBTAG00000001396 ENSBTAT00000038814 protein_coding         1
+
+> write.table(df, file="stgn_per_gene.txt", sep="\t", row.names=F,quote=F)
+> q()
+Save workspace image? [y/n/c]: y
+[kiranmayee.bakshy@assembler2 annotated]$ grep "^#CHROM" combined.ann.vcf > sample.list
+
+# I manually edited the sample file to include population id column
+
+[kiranmayee.bakshy@gateway1 ~]$ java -jar /mnt/nfs/nfs2/bickhart-users/binaries/LargeVCFParser/store/LargeVCFParser.jar popstats -p /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/sample.list -v /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined.ann.vcf -o /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined
+[MAIN] Command line arguments supplied:
+popstats -p /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/sample.list -v /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined.ann.vcf -o /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined
+[MAIN] Debug flag set to: true
+LargeVCFParser  version: 0.0.2
+Mode: popstats
+Cmd line options: popstats -p /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/sample.list -v /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined.ann.vcf -o /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined
+[POPSTATS] VCF sample count: 172
+```
+The stats are ready...
+
+Now try to separate the homozygous variants...
 
 
 
