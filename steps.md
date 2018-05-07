@@ -215,16 +215,28 @@ Now try to separate the homozygous variants...
 Generate some stats and plot:
 ```bash
 # Calculating stats
-sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=10000 --wrap="gzip combined.ann.vcf | bcftools index; bcftools stats -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' combined.ann.vcf > combined.vstats"
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=10000 --wrap="bcftools stats --debug -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' combined.ann.vcf.gz > combined.d.vstats"
 
 mkdir vcfstatplots
 plot-vcfstats -r -p vcfstatplots combined.vstats
 ```
 
+```bash
 
+# sort the vcf file according to chr and position:
+# cat <(zcat $vcf | grep -B10000 -m1 ^#CHROM) <(bcftools view -H $vcf | sort -k1V,1 -k2n,2) | bgzip > out.vcf.gz
+cat <(zcat combined_st.gn.vcf.gz | grep -B10000 -m1 ^#CHROM) <(bcftools view -H combined_st.gn.vcf.gz | sort -k1V,1 -k2n,2) | gzip > combined_st.gn.sorted.vcf.gz
+gunzip combined_st.gn.sorted.vcf.gz
+bgzip combined_st.gn.sorted.vcf
+module load samtools
+tabix -p vcf combined_st.gn.sorted.vcf.gz
 
+module load gatk/3.7
+# Calculate the genotype count in a sorted and indexed vcf file using GATK (VariantsToTable):
+GenomeAnalysisTK -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/test_files/umd3_kary_unmask_ngap.fa -T VariantsToTable -V combined_st.gn.sorted.vcf.gz -F CHROM -F POS -F ID -F QUAL -F HET -F HOM-REF -F HOM-VAR -F NO-CALL -F NSAMPLES -o test
 
-
+# Calculate sample level stats using verbose option 
+sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=10000 --wrap="bcftools stats -v -s - -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' combined.ann.vcf.gz > combined.d.vstats"
 
 
 
