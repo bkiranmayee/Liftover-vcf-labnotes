@@ -238,6 +238,88 @@ GenomeAnalysisTK -R /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcf
 # Calculate sample level stats using verbose option 
 sbatch --nodes=1 --partition=assemble2 --ntasks-per-node=1 --mem=10000 --wrap="bcftools stats -v -s - -F /mnt/nfs/nfs2/Genomes/umd3_kary_unmask_ngap.fa --af-bins '(0.05,0.1,0.5,1)' combined.ann.vcf.gz > combined.d.vstats"
 
+# Run plink2 to test all stopgain variants for HWE:
+# Filters used: no chrX variants, no variants with QUAL < 900
+# Subsetting
+[kiranmayee.bakshy@assembler2 annotated]$ bcftools view -r chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chr23,chr24,chr25,chr26,chr27,chr28,chr29 combined_st.gn.sorted.vcf.gz -Oz -o stgn.eX.vcf.gz
+# Check no. of variants
+[kiranmayee.bakshy@assembler2 annotated]$ bcftools stats combined_st.gn.vcf.gz | grep -P "SN\t"
+# SN    [2]id   [3]key  [4]value
+SN      0       number of samples:      172
+SN      0       number of records:      919
+SN      0       number of no-ALTs:      0
+SN      0       number of SNPs: 876
+SN      0       number of MNPs: 0
+SN      0       number of indels:       43
+SN      0       number of others:       0
+SN      0       number of multiallelic sites:   25
+SN      0       number of multiallelic SNP sites:       22
+[kiranmayee.bakshy@assembler2 annotated]$ bcftools stats stgn.eX.vcf.gz | grep -P "SN\t"
+# SN    [2]id   [3]key  [4]value
+SN      0       number of samples:      172
+SN      0       number of records:      866
+SN      0       number of no-ALTs:      0
+SN      0       number of SNPs: 827
+SN      0       number of MNPs: 0
+SN      0       number of indels:       39
+SN      0       number of others:       0
+SN      0       number of multiallelic sites:   21
+SN      0       number of multiallelic SNP sites:       18
+
+# Run the test
+[kiranmayee.bakshy@assembler2 annotated]$ plink2 --vcf stgn.eX.vcf.gz dosage=GP --vcf-min-qual 900 --cow --nonfounders --hardy
+PLINK v2.00aLM 64-bit Intel (22 May 2017)
+Options in effect:
+  --cow
+  --hardy
+  --nonfounders
+  --var-min-qual 900
+  --vcf stgn.eX.vcf.gz dosage=GP
+
+Hostname: assembler2.agil.barc.ba.ars.usda.gov
+Working directory: /mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated
+Start time: Tue May  8 12:47:56 2018
+
+Random number seed: 1525798076
+515987 MB RAM detected; reserving 257993 MB for main workspace.
+Using up to 64 threads (change this with --threads).
+Warning: No GP field in --vcf file header. Dosages will not be imported.
+--vcf: 845 variants scanned.
+21 multiallelic variants skipped (not yet supported).
+--vcf: plink2-temporary.pgen + plink2-temporary.pvar + plink2-temporary.psam
+written.
+172 samples (0 females, 0 males, 172 ambiguous; 169 founders) loaded from
+plink2-temporary.psam.
+579 out of 845 variants loaded from plink2-temporary.pvar.
+Note: No phenotype data present.
+172 samples (0 females, 0 males, 172 ambiguous; 169 founders) remaining after
+main filters.
+Calculating allele frequencies... done.
+--hardy: Autosomal Hardy-Weinberg report (all samples) written to plink2.hardy
+.
+
+End time: Tue May  8 12:47:56 2018
+
+# Merge the plink data with the annotations
+[kiranmayee.bakshy@assembler2 annotated]$ R
+> df1<-read.table(file="/mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/combined_st.gn.txt",sep="\t",header=F,stringsAsFactors=F)
+> df2<-read.table(file="/mnt/nfs/nfs1/derek.bickhart/CDDR-Project/vcfs/condensed_vcfs/liftover/annotated/plink2.hardy",sep="\t",header=F,stringsAsFactors=F)
+> colnames(df1)<-c("CHROM","POS","ID","REF","ALT","QUAL","INFO")
+> colnames(df2)<-c("CHROM","ID","REF","ALT","HOM_REF_CT","HET_REF_CT","NONREF_CT","O(HET_REF)","E(HET_REF)","P")
+> df_merge<-merge(df1,df2,by="ID")
+> write.table(df_merge,file="stgn_plinkhwe.txt",sep="\t", row.names=F,quote=F)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
